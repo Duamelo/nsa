@@ -1,0 +1,36 @@
+{
+   "compilerOptions": {
+      "module": "commonjs",
+      "target": "es2018",
+      "lib": [
+         "es2018"
+      ],
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "strict": false,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "outDir": "./build",
+      "baseUrl": "./",
+      "paths": {
+         "@/*": [
+            "src/*"
+         ]
+      },
+      "types": [
+         "node",
+         "jest"
+      ]
+   },
+   "include": [
+      "src/**/*",
+      "tests/**/*",
+      "src/index.ts"
+   ],
+   "exclude": [
+      "node_modules",
+      "build"
+   ]
+}
