@@ -21,9 +21,8 @@ export class UserController {
     // Get the user from database
     const userRepository = getRepository(User);
     try {
-      const user = await userRepository.findOneOrFail({
+      const user = await userRepository.findOne({
         where: { id },
-        relations: ['jpo', 'prospection'],
         select: ['id', 'username', 'role'], // We dont want to send the password on response
       });
       res.status(200).send(user);

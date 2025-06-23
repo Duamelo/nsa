@@ -24,13 +24,13 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
   // The token is valid for 1 hour
   // We want to send a new token on every request
-  // const { userId, username, bank } = jwtPayload;
-  // const newToken = jwt.sign({ userId, username, bank }, config.jwtSecret, {
-  //   expiresIn: '1h',
-  // });
-  // console.log('New token generated:', newToken);
-  // res.setHeader('token', newToken);
-  // console.log(res.header);
+  const { userId, username, bank } = jwtPayload;
+  const newToken = jwt.sign({ userId, username, bank }, config.jwtSecret, {
+    expiresIn: '1h',
+  });
+  console.log('New token generated:', newToken);
+  res.setHeader('token', newToken);
+  console.log(res.header);
   // Call the next middleware or controller
   next();
 };
