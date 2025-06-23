@@ -1,10 +1,10 @@
-// src/logger/logger.ts
 import { createLogger, format, transports } from 'winston';
 import { context, trace } from '@opentelemetry/api';
+import path from 'path';
 
 const { combine, timestamp, errors, json } = format;
 
-// Ajoute traceId & spanId si disponibles
+// Injecte traceId/spanId d'OpenTelemetry dans chaque log
 const addTraceContext = format((info) => {
     const span = trace.getSpan(context.active());
     if (span) {
@@ -21,11 +21,16 @@ const logger = createLogger({
         timestamp(),
         errors({ stack: true }),
         addTraceContext(),
-        json()
+        json() // Format JSON propre
     ),
     transports: [
-        new transports.Console()
-    ]
+        new transports.File({
+            filename: path.join(__dirname, '../../logs/app.log'),
+            level: 'info',
+            maxsize: 5_000_000, // 5 Mo par fichier
+            maxFiles: 5, // Garder les 5 derniers
+        }),
+    ],
 });
 
 export default logger;

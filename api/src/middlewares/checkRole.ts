@@ -12,7 +12,9 @@ export const checkRole = (roles: string[]) => {
     const userRepository = getRepository(User);
     let user: User;
     try {
-      user = await userRepository.findOneOrFail(id);
+      user = await userRepository.findOne({
+        where: { id: id },
+      });;
     } catch {
       res.status(401).send();
       return;

@@ -7,7 +7,7 @@ import { createConnection } from 'typeorm';
 import routes from './routes';
 
 import * as dotenv from 'dotenv';
-import logRequest from './middlewares/logRequest';
+import { logRequest } from './middlewares/logRequest';
 import '../src/logger/otel';
 
 dotenv.config();

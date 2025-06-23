@@ -10,13 +10,13 @@ import {
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 
 // For troubleshooting, set the log level to DiagLogLevel.DEBUG
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
 const sdk = new NodeSDK({
-    traceExporter: new ConsoleSpanExporter(),
-    metricReader: new PeriodicExportingMetricReader({
-        exporter: new ConsoleMetricExporter(),
-    }),
+    // traceExporter: new ConsoleSpanExporter(),
+    // metricReader: new PeriodicExportingMetricReader({
+    //     exporter: new ConsoleMetricExporter(),
+    // }),
     instrumentations: [getNodeAutoInstrumentations()],
 });
 
