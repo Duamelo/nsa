@@ -4,7 +4,6 @@ import config from '../config/config';
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   // Get the jwt token from the head
-  console.log(req.headers)
   if (req.headers.auth === undefined) {
     res.status(400).send('No token provide');
   }
@@ -30,7 +29,6 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   });
   console.log('New token generated:', newToken);
   res.setHeader('token', newToken);
-  console.log(res.header);
   // Call the next middleware or controller
   next();
 };
