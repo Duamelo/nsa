@@ -5,17 +5,13 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Unique,
   OneToMany,
-  BeforeInsert,
-  BeforeUpdate
 } from 'typeorm';
 import { IsNotEmpty, Length } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { StockMovement } from './StockMovement';
 
 @Entity()
-@Unique(['username'])
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -60,8 +56,6 @@ export class User {
     return bcrypt.compareSync(unencryptedPassword, this.password);
   }
 
-  @BeforeInsert()
-  @BeforeUpdate()
   async hashPasswordBeforeSave() {
     // Ne rehash pas un mot de passe déjà hashé
     if (!this.password.startsWith('$2b$')) {

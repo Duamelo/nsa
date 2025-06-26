@@ -3,7 +3,7 @@ import 'reflect-metadata';
 // Approach alternative : mocker le module avant tout import
 jest.mock('bcryptjs');
 
-// Mock TypeORM decorators
+// Mock TypeORM decorators - Include ALL decorators used in your entities
 jest.mock('typeorm', () => ({
     getRepository: jest.fn(),
     createConnection: jest.fn(),
@@ -14,21 +14,32 @@ jest.mock('typeorm', () => ({
     UpdateDateColumn: () => () => { },
     OneToMany: () => () => { },
     ManyToOne: () => () => { },
+    OneToOne: () => () => { },      // Added this - used in Stock entity
     JoinColumn: () => () => { },
     Unique: () => () => { },
     Index: () => () => { },
     BeforeInsert: () => () => { },
     BeforeUpdate: () => () => { },
     AfterLoad: () => () => { },
+    BeforeRemove: () => () => { },  // Optional, commonly used
+    AfterInsert: () => () => { },   // Optional, commonly used
+    AfterUpdate: () => () => { },   // Optional, commonly used
+    AfterRemove: () => () => { },   // Optional, commonly used
 }));
 
-// Mock class-validator
+// Mock class-validator - Include ALL validators used in your entities
 jest.mock('class-validator', () => ({
     validate: jest.fn(),
     IsNotEmpty: () => () => { },
     Length: () => () => { },
     IsEmail: () => () => { },
     IsOptional: () => () => { },
+    IsNumber: () => () => { },  // Added this
+    Min: () => () => { },       // Added this
+    Max: () => () => { },       // Optional, in case you use it
+    IsIn: () => () => { },      // Added this (used in StockMovement)
+    IsString: () => () => { },  // Optional, commonly used
+    IsBoolean: () => () => { }, // Optional, commonly used
 }));
 
 // Mock class-transformer
@@ -38,14 +49,16 @@ jest.mock('class-transformer', () => ({
     classToPlain: jest.fn(),
 }));
 
+// Mock bcrypt directly since you're using bcrypt (not bcryptjs)
+jest.mock('bcrypt', () => ({
+    hashSync: jest.fn(),
+    compareSync: jest.fn(),
+}));
+
 // Importer après les mocks
 import { User } from '../../src/entity/User';
 import { validate } from 'class-validator';
-import * as bcrypt from 'bcryptjs';
-
-// Configuration des mocks après l'import
-const mockHashSync = jest.fn();
-const mockCompareSync = jest.fn();
+import * as bcrypt from 'bcrypt';
 
 describe('User Entity', () => {
     let user: User;
@@ -55,8 +68,8 @@ describe('User Entity', () => {
         jest.clearAllMocks();
 
         // Configuration des valeurs de retour des mocks
-        mockHashSync.mockImplementation((password: string) => `hashed_${password}`);
-        mockCompareSync.mockImplementation((plain: string, hashed: string) => hashed === `hashed_${plain}`);
+        (bcrypt.hashSync as jest.Mock).mockImplementation((password: string) => `hashed_${password}`);
+        (bcrypt.compareSync as jest.Mock).mockImplementation((plain: string, hashed: string) => hashed === `hashed_${plain}`);
     });
 
     describe('User Creation', () => {
@@ -81,6 +94,70 @@ describe('User Entity', () => {
             expect(user.username).toBe('testuser');
             expect(user.password).toBe('testpass');
             expect(user.role).toBe('NORMAL');
+        });
+    });
+
+    describe('Password Methods', () => {
+        beforeEach(() => {
+            user.username = 'testuser';
+            user.password = 'plainpassword';
+        });
+
+        it('should hash password', () => {
+            // Act
+            user.hashPassword();
+
+            // Assert
+            expect(bcrypt.hashSync).toHaveBeenCalledWith('plainpassword', 10);
+            expect(user.password).toBe('hashed_plainpassword');
+        });
+
+        it('should validate correct password', () => {
+            // Arrange
+            user.password = 'hashed_plainpassword';
+
+            // Act
+            const isValid = user.checkIfUnencryptedPasswordIsValid('plainpassword');
+
+            // Assert
+            expect(bcrypt.compareSync).toHaveBeenCalledWith('plainpassword', 'hashed_plainpassword');
+            expect(isValid).toBe(true);
+        });
+
+        it('should reject incorrect password', () => {
+            // Arrange
+            user.password = 'hashed_plainpassword';
+
+            // Act
+            const isValid = user.checkIfUnencryptedPasswordIsValid('wrongpassword');
+
+            // Assert
+            expect(bcrypt.compareSync).toHaveBeenCalledWith('wrongpassword', 'hashed_plainpassword');
+            expect(isValid).toBe(false);
+        });
+
+        it('should not rehash already hashed password', async () => {
+            // Arrange
+            user.password = '$2b$10$hashedpassword';
+
+            // Act
+            await user.hashPasswordBeforeSave();
+
+            // Assert
+            expect(bcrypt.hashSync).not.toHaveBeenCalled();
+            expect(user.password).toBe('$2b$10$hashedpassword');
+        });
+
+        it('should hash new password before save', async () => {
+            // Arrange
+            user.password = 'newplainpassword';
+
+            // Act
+            await user.hashPasswordBeforeSave();
+
+            // Assert
+            expect(bcrypt.hashSync).toHaveBeenCalledWith('newplainpassword', 10);
+            expect(user.password).toBe('hashed_newplainpassword');
         });
     });
 
@@ -109,8 +186,8 @@ describe('User Entity', () => {
             user.password = '123'; // Too short
 
             const mockErrors = [
-                { property: 'username', constraints: { length: 'username must be longer than 4 characters' } },
-                { property: 'password', constraints: { length: 'password must be longer than 4 characters' } }
+                { property: 'username', constraints: { length: 'username must be longer than 3 characters' } },
+                { property: 'password', constraints: { length: 'password must be longer than 6 characters' } }
             ];
 
             (validate as jest.Mock).mockResolvedValue(mockErrors);

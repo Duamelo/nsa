@@ -7,7 +7,6 @@ import { User } from '../entity/User';
 
 export class AuthController {
   public static register = async (req: Request, res: Response) => {
-    console.log('Registering user...');
     const { username, password } = req.body;
     const user = new User();
     user.username = username;
@@ -38,7 +37,6 @@ export class AuthController {
   };
 
   public static login = async (req: Request, res: Response): Promise<void> => {
-    console.log('Logging in user...');
     const { username, password } = req.body;
 
     if (!(username && password)) {

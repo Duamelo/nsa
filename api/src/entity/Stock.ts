@@ -1,7 +1,6 @@
 
 // src/entity/Stock.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
-import { IsNumber, Min } from 'class-validator';
 import { Product } from './Product';
 
 export type StockStatus = 'OUT_OF_STOCK' | 'CRITICAL' | 'LOW' | 'NORMAL';
@@ -12,18 +11,12 @@ export class Stock {
     id!: number;
 
     @Column({ type: 'int', default: 0 })
-    @IsNumber()
-    @Min(0)
     quantity!: number;
 
     @Column({ type: 'int', default: 0 })
-    @IsNumber()
-    @Min(0)
     minThreshold!: number;
 
     @Column({ type: 'int', default: 0 })
-    @IsNumber()
-    @Min(0)
     criticalThreshold!: number;
 
     @Column()

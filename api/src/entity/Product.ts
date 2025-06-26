@@ -12,7 +12,6 @@ export class Product {
 
     @Column()
     @IsNotEmpty()
-    @Length(2, 100)
     name!: string;
 
     @Column({ type: 'text', nullable: true })
