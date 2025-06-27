@@ -14,5 +14,8 @@ until nc -z "$host" "$port"; do
   sleep 1
 done
 
->&2 echo "Database is up - executing command"
-exec $cmd
+
+>&2 echo "✅ $host:$port is up - running migrations and starting app"
+
+# npm run migration:run
+npm run start:prod

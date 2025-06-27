@@ -1,18 +1,40 @@
-FROM node:18-alpine
+###################
+# BUILD FOR PRODUCTION
+###################
 
-RUN mkdir -p /usr/src/app
+FROM node:20-alpine AS build
+
 WORKDIR /usr/src/app
 
-# Install netcat for the wait script
-RUN apk add --no-cache bash netcat-openbsd
+COPY --chown=node:node package*.json ./
 
-COPY . .
-RUN yarn install
+ENV NODE_ENV=production
 
-# Add wait script and entrypoint
-COPY wait-for.sh /wait-for.sh
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /wait-for.sh /entrypoint.sh
+RUN npm ci --omit=dev && npm cache clean --force
 
-EXPOSE 4000
-ENTRYPOINT ["/entrypoint.sh"]
+COPY --chown=node:node . .
+
+RUN npm run build
+
+USER node
+
+###################
+# PRODUCTION
+###################
+
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+COPY --chown=node:node --from=build /usr/src/app/build ./build
+COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+# COPY --chown=node:node --from=build /usr/src/app/wait-for.sh ./wait-for.sh
+# COPY --chown=node:node --from=build /usr/src/app/package.json ./package.json
+
+# RUN chmod +x ./wait-for.sh
+
+USER node
+
+CMD ["node", "build/src/index.js"]
+
+EXPOSE 5000

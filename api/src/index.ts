@@ -3,12 +3,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { createConnection } from 'typeorm';
 import routes from './routes';
 
 import * as dotenv from 'dotenv';
 import { logRequest } from './middlewares/logRequest';
 import '../src/logger/otel';
+import { AppDataSource } from './config/data-source';
 
 dotenv.config();
 
@@ -21,26 +21,20 @@ app.use(helmet());
 app.use(morgan('combined'));
 app.use(express.json());
 
-const connectDatabase = async () => {
+
+export const connectDatabase = async () => {
   try {
-    await createConnection({
-      type: process.env.DB_TYPE as 'mysql',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '3306'),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      synchronize: process.env.NODE_ENV === 'development',
-      logging: process.env.NODE_ENV === 'development',
-      entities: [
-        __dirname + '/entity/**/*.ts',
-        __dirname + '/entity/**/*.js'
-      ],
-      charset: 'utf8mb4'
-    });
+    await AppDataSource.initialize();
     console.log('✅ Connexion à la base de données MySQL réussie !');
+    console.log(`Env: ${process.env.NODE_ENV}`);
+
+    if (process.env.NODE_ENV === 'production') {
+      console.log('🚀 Exécution des migrations...');
+      await AppDataSource.runMigrations();
+      console.log('✅ Migrations exécutées avec succès.');
+    }
   } catch (error) {
-    console.error('❌ Erreur de connexion à la base de données:', error);
+    console.error('❌ Erreur de connexion à la base de données :', error);
     process.exit(1);
   }
 };

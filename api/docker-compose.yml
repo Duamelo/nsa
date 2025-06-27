@@ -1,32 +1,30 @@
+# Docker compose file for dev env, not used in production
 services:
   db:
-    # the service hosting your MySQL instance
-    image: mysql:5.7 # the image and tag docker will pull from docker hub
-    container_name: dev_db
+    image: mysql:8.2
+    container_name: store_db
     volumes:
-      # this section allows you to configure persistence within multiple restarts
       - db_data:/var/lib/mysql
-    restart: always # if the db crash somehow, restart it
+    restart: always
     environment:
-      # env variables, you usually set this to override existing ones
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dev_db
-    # MYSQL_USER: root
-    # MYSQL_PASSWORD: root
+      MYSQL_USER: "store_user"
+      MYSQL_PASSWORD: "St0r3@U$er"
+      MYSQL_DATABASE: "store_db"
+      MYSQL_ROOT_PASSWORD: "RO0t@Root"
     ports:
       - "3307:3306"
     networks:
       - backend
 
   api:
-    container_name: dev_api
-    image: NSA_API
+    container_name: store-management-api
+    image: store-management-api:latest
     build: .
     restart: always
-    environment:
-      DB_HOST: db
+    env_file:
+      - .env
     ports:
-      - "5000:4000"
+      - "3000:5000"
     networks:
       - backend
     depends_on:
@@ -35,5 +33,6 @@ services:
 networks:
   backend:
     driver: bridge
+
 volumes:
   db_data: 
