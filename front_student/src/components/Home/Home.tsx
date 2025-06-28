@@ -10,12 +10,29 @@ import StockList from "../Stocks/StockList";
 const Home: React.FC = () => {
   const products: IProductState = useSelector((state: IStateType) => state.products);
   const numberItemsCount: number = products.products.length;
-  const totalPrice: number = products.products.reduce((prev, next) => prev + ((next.price * 0) || 0), 0);
-  const totalProductAmount: number = products.products.reduce((prev, next) => prev + (0 || 0), 0);
 
   const stocks: IStock[] = useSelector((state: IStateType) => state.stocks.stocks);
-  const totalSales: number = stocks.reduce((prev, next) => prev + next.totalPrice, 0);
-  const totalStockAmount: number = stocks.reduce((prev, next) => prev + 0, 0);
+
+  const totalStockAmount = stocks.reduce((acc, movement) => {
+    let price = typeof movement.product.price == "string"
+      ? parseFloat(movement.product.price)
+      : movement.product.price ?? 0;
+
+    if (movement.type == "ENTRY") {
+      return acc + movement.quantity * price;
+    } else if (movement.type == "EXIT") {
+      return acc - movement.quantity * price;
+    }
+    return acc;
+  }, 0);
+
+  const totalCriticalProduct: number = products.products.filter(
+    p =>
+      p.stock &&
+      p.stock.minThreshold !== undefined &&
+      p.stock.quantity !== undefined &&
+      p.stock.minThreshold > p.stock.quantity
+  ).length;
 
   const dispatch: Dispatch<any> = useDispatch();
   dispatch(updateCurrentPath("home", ""));
@@ -27,13 +44,8 @@ const Home: React.FC = () => {
 
       <div className="row">
         <TopCard title="PRODUCT COUNT" text={`${numberItemsCount}`} icon="box" class="primary" />
-        <TopCard title="PRODUCT CRITICAL" text={`${totalProductAmount}`} icon="warehouse" class="danger" />
-        <TopCard title="SUMMARY PRICE" text={`$${totalPrice}`} icon="dollar-sign" class="success" />
-      </div>
-
-      <div className="row">
-        <TopCard title="SALES" text={totalSales.toString()} icon="donate" class="primary" />
-        <TopCard title="STOCK AMOUNT" text={totalStockAmount.toString()} icon="calculator" class="danger" />
+        <TopCard title="PRODUCT CRITICAL" text={`${totalCriticalProduct}`} icon="warehouse" class="danger" />
+        <TopCard title="STOCK AMOUNT" text={totalStockAmount.toString() + " €"} icon="calculator" class="danger" />
       </div>
 
       <div className="row">
@@ -44,7 +56,7 @@ const Home: React.FC = () => {
               <h6 className="m-0 font-weight-bold text-green">Product list</h6>
             </div>
             <div className="card-body">
-              {/* <ProductList products={products} /> */}
+              <ProductList />
             </div>
           </div>
 

@@ -2,8 +2,11 @@ import { IProduct } from "./product.interface";
 
 export interface IStock {
     id: number;
-    name: string;
     product: IProduct;
-    amount: number;
-    totalPrice: number;
+    quantity: number;
+    reference: string;
+    reason: string;
+    newQuantity?: number;
+    previousQuantity?: number;
+    type?: string;
 }

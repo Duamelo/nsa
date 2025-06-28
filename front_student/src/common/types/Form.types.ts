@@ -20,8 +20,7 @@ export interface IProductFormState {
 }
 
 export  interface IStockFormState {
-    name: IFormStateField<string>;
-    product: IFormStateField<IProduct | null>;
-    amount: IFormStateField<number>;
-    totalPrice: IFormStateField<number>;
+    quantity: { error: string, value: number };
+    reason: { error: string, value: string };
+    reference: { error: string, value: string };
 };

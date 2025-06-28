@@ -1,4 +1,4 @@
-import React, { Dispatch } from "react";
+import React, { Dispatch, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IStateType } from "../../store/models/root.interface";
 import { INotification } from "../../store/models/notification.interface";
@@ -9,9 +9,25 @@ const Notifications: React.FC = () => {
   const notifications: INotification[] = useSelector((state: IStateType) =>
     state.notifications.notifications);
 
-  function closeNotification(id: number) {
+  useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = [];
+
+    notifications.forEach((notification) => {
+      const timeout = setTimeout(() => {
+        dispatch(removeNotification(notification.id));
+      }, 3000);
+
+      timeouts.push(timeout);
+    });
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
+  }, [notifications, dispatch]);
+
+  const closeNotification = (id: number) => {
     dispatch(removeNotification(id));
-  }
+  };
 
   const notificationList = notifications.map(notification => {
     return (

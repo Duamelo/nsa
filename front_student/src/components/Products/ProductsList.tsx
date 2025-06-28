@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IStateType, IProductState } from "../../store/models/root.interface";
 import { fetchProducts } from "../../store/actions/products.action";
-import { addNotification } from "../../store/actions/notifications.action";
 import {
   IProduct,
   ProductModificationStatus,
@@ -12,8 +11,8 @@ import {
 function ProductList({ onSelect }: { onSelect?: (product: IProduct) => void }): JSX.Element {
 
   const dispatch = useDispatch();
-    const products: IProductState = useSelector((state: IStateType) => state.products);
-  
+  const products: IProductState = useSelector((state: IStateType) => state.products);
+
 
   useEffect(() => {
     dispatch(fetchProducts());

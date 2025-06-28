@@ -4,38 +4,24 @@ import TextInput from "../../common/components/TextInput";
 import NumberInput from "../../common/components/NumberInput";
 import { OnChangeModel, IStockFormState } from "../../common/types/Form.types";
 import { useDispatch, useSelector } from "react-redux";
-import { addStock } from "../../store/actions/stocks.actions";
-import { addNotification } from "../../store/actions/notifications.action";
+import { entryStock, exitStock } from "../../store/actions/stocks.actions";
 import { clearSelectedProduct, changeProductAmount } from "../../store/actions/products.action";
 import { IStateType } from "../../store/models/root.interface";
+
 
 const StockForm: React.FC = () => {
     const dispatch: Dispatch<any> = useDispatch();
     const selectedProduct: IProduct | null = useSelector((state: IStateType) => state.products.selectedProduct);
+
     const initialFormState: IStockFormState = {
-        name: { error: "", value: "" },
-        product: { error: "", value: null },
-        amount: { error: "", value: 0 },
-        totalPrice: { error: "", value: 0 },
+        quantity: { error: "", value: 0 },
+        reason: { error: "", value: "" },
+        reference: { error: "", value: "" },
     };
 
     const [formState, setFormState] = useState(initialFormState);
 
-    function hasAmountChanged(model: OnChangeModel): void {
-        let totalPrice: number = formState.totalPrice.value;
-        if (selectedProduct) {
-            totalPrice = selectedProduct.price * (model.value as number);
-        }
-
-        setFormState({
-            ...formState,
-            amount: { error: model.error, value: model.value as number },
-            totalPrice: { error: model.error, value: totalPrice }
-        });
-
-    }
-
-    function hasFormValueChanged(model: OnChangeModel): void {
+    function handleChange(model: OnChangeModel): void {
         setFormState({ ...formState, [model.field]: { error: model.error, value: model.value } });
     }
 
@@ -43,90 +29,126 @@ const StockForm: React.FC = () => {
         setFormState(initialFormState);
     }
 
-    function saveStock(e: FormEvent<HTMLFormElement>): void {
-        e.preventDefault();
-        if (isFormInvalid()) {
-            return;
-        }
-
-        saveForm(formState);
-    }
-
-    function saveForm(formState: IStockFormState): void {
-        if (selectedProduct) {
-            if (selectedProduct.price < formState.amount.value) {
-                alert("Not enough products in warehouse");
-                return;
-            }
-
-            formState.product.value = selectedProduct;
-            dispatch(addStock({
-                id: 0,
-                name: formState.name.value,
-                amount: formState.amount.value,
-                totalPrice: formState.totalPrice.value,
-                product: formState.product.value as IProduct
-            }));
-
-            dispatch(addNotification("Stock added", `Stock ${formState.name.value} added by you`));
-            dispatch(clearSelectedProduct());
-            dispatch(changeProductAmount(selectedProduct.id, formState.amount.value));
-            resetForm();
-        }
-    }
-
     function isFormInvalid(): boolean {
-        return (formState.amount.error || formState.totalPrice.error
-            || formState.name.error || formState.product.error || !formState.name.value
-            || !selectedProduct) as boolean;
+        return (
+            !selectedProduct ||
+            !!formState.quantity.error || !!formState.reason.error || !!formState.reference.error ||
+            !formState.quantity.value || !formState.reason.value || !formState.reference.value
+        );
+    }
+
+    function entrStock(e: React.MouseEvent<HTMLButtonElement>): void {
+        e.preventDefault();
+        // if (isFormInvalid()) return;
+
+        const payload = {
+            id: 0,
+            quantity: formState.quantity.value,
+            product: selectedProduct!,
+            reason: formState.reason.value,
+            reference: formState.reference.value,
+        };
+
+        dispatch(entryStock(payload));
+        dispatch(clearSelectedProduct());
+        if (selectedProduct) {
+            dispatch(changeProductAmount(selectedProduct.id, formState.quantity.value));
+        }
+        resetForm();
+    }
+
+    function exiStock(e: React.MouseEvent<HTMLButtonElement>): void {
+        e.preventDefault();
+        // if (isFormInvalid()) return;
+
+        const payload = {
+            id: 0,
+            quantity: formState.quantity.value,
+            product: selectedProduct!,
+            reason: formState.reason.value,
+            reference: formState.reference.value,
+        };
+
+
+        dispatch(exitStock(payload));
+        dispatch(clearSelectedProduct());
+        if (selectedProduct) {
+            dispatch(changeProductAmount(selectedProduct.id, -formState.quantity.value));
+        }
+        resetForm();
     }
 
     function getDisabledClass(): string {
-        let isError: boolean =  isFormInvalid();
-        return isError ? "disabled" : "";
+        return isFormInvalid() ? "disabled" : "";
     }
 
     return (
         <Fragment>
             <div className="card shadow mb-4">
                 <div className="card-header py-3">
-                    <h6 className="m-0 font-weight-bold text-green">Create stock</h6>
+                    <h6 className="m-0 font-weight-bold text-green">Ajouter au stock</h6>
                 </div>
                 <div className="card-body">
-                    <form onSubmit={saveStock}>
+                    <form onSubmit={(e) => e.preventDefault()} className="form-horizontal">
                         <div className="form-row">
-                            <div className="form-group col-md-12">
-                                <TextInput id="input_name"
-                                    value={formState.name.value}
-                                    field="name"
-                                    onChange={hasFormValueChanged}
+                            <div className="form-group col-md-4">
+                                <NumberInput
+                                    id="input_quantity"
+                                    value={formState.quantity.value}
+                                    field="quantity"
+                                    onChange={handleChange}
+                                    min={1}
+                                    max={1000}
+                                    label="Quantité"
+                                />
+                            </div>
+                            <div className="form-group col-md-4">
+                                <TextInput
+                                    id="input_reason"
+                                    value={formState.reason.value}
+                                    field="reason"
+                                    onChange={handleChange}
+                                    label="Raison"
                                     required={true}
-                                    maxLength={20}
-                                    label="Name"
-                                    placeholder="Name" />
+                                    placeholder="Ex : Réassort"
+                                    maxLength={50}
+                                />
                             </div>
-                            <div className="form-group col-md-6">
-                                <NumberInput id="input_amount"
-                                    value={formState.amount.value}
-                                    field="amount"
-                                    onChange={hasAmountChanged}
-                                    max={1000}
-                                    min={0}
-                                    label="Amount" />
-                            </div>
-
-                            <div className="form-group col-md-6">
-                                <NumberInput id="input_totalPrice"
-                                    value={formState.totalPrice.value}
-                                    field="totalPrice"
-                                    onChange={hasFormValueChanged}
-                                    max={1000}
-                                    min={0}
-                                    label="Price" />
+                            <div className="form-group col-md-4">
+                                <TextInput
+                                    id="input_reference"
+                                    value={formState.reference.value}
+                                    field="reference"
+                                    onChange={handleChange}
+                                    label="Référence"
+                                    required={true}
+                                    placeholder="Réf. commande ou facture"
+                                    maxLength={50}
+                                />
                             </div>
                         </div>
-                        <button className="btn btn-danger" onClick={() => resetForm()}>Reset</button>
-                        <button type="submit" className={`btn btn-success left-margin ${getDisabledClass()}`}>Create</button>
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={resetForm}
+                        >
+                            Reset
+                        </button>
+
+                        <button
+                            type="submit" onClick={entrStock}
+                            className={`btn btn-success ml-2 ${getDisabledClass()}`}
+                        >
+                            Entry
+                        </button>
+
+                        <button
+                            type="submit" onClick={exiStock}
+                            className={`btn btn-warning ml-2 ${getDisabledClass()}`}
+                        >
+                            Exit
+                        </button>
+
                     </form>
                 </div>
             </div>
@@ -135,3 +157,4 @@ const StockForm: React.FC = () => {
 };
 
 export default StockForm;
+
