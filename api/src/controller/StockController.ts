@@ -50,6 +50,7 @@ export class StockController {
                 product.stock = await stockRepository.save(newStock);
             }
 
+            console.log('Stock avant l\'entrée:', product.stock);
             const previousQuantity = product.stock.quantity;
 
             // Utiliser la méthode addStock de l'entité Stock

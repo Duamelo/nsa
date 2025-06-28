@@ -4,25 +4,202 @@ import { checkJwt } from '../middlewares/checkJwt';
 import { checkRole } from '../middlewares/checkRole';
 
 const router = Router();
+/**
+ * @swagger
+ * tags:
+ *   name: Stock
+ *   description: Opérations liées à la gestion du stock
+ */
 
-// Routes de consultation - Authentification requise
+/**
+ * @swagger
+ * /stock/alerts:
+ *   get:
+ *     summary: Liste des produits avec alerte de stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Produits avec stock critique
+ */
 router.get('/alerts', [checkJwt], StockController.getAllStocksWithAlerts);
+
+/**
+ * @swagger
+ * /stock/current/{productId}:
+ *   get:
+ *     summary: Obtenir le stock courant d’un produit
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Stock courant du produit
+ */
 router.get('/current/:productId([0-9]+)', [checkJwt], StockController.getCurrentStock);
+
+/**
+ * @swagger
+ * /stock/history:
+ *   get:
+ *     summary: Historique des mouvements de stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Liste des mouvements de stock
+ */
 router.get('/history', [checkJwt], StockController.getStockHistory);
+
+/**
+ * @swagger
+ * /stock/history/{productId}:
+ *   get:
+ *     summary: Historique des mouvements d’un produit
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Historique du produit
+ */
 router.get('/history/:productId([0-9]+)', [checkJwt], StockController.getStockHistory);
+
+/**
+ * @swagger
+ * /stock/recent:
+ *   get:
+ *     summary: Derniers mouvements de stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Mouvements récents
+ */
 router.get('/recent', [checkJwt], StockController.getRecentMovements);
 
-// Route de rapport - ADMIN/MANAGER requis
+/**
+ * @swagger
+ * /stock/report:
+ *   get:
+ *     summary: Générer un rapport global du stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Rapport généré
+ *       403:
+ *         description: Accès interdit
+ */
 router.get('/report', [checkJwt, checkRole(['ADMIN', 'MANAGER'])], StockController.getStockReport);
 
-// Routes de modification de stock
-// Entrée de stock - ADMIN/MANAGER/EMPLOYEE (peut être utilisé pour réception de livraisons)
+/**
+ * @swagger
+ * /stock/entry:
+ *   post:
+ *     summary: Enregistrer une entrée de stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - quantity
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *               quantity:
+ *                 type: number
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Entrée de stock enregistrée
+ */
 router.post('/entry', [checkJwt, checkRole(['ADMIN', 'MANAGER', 'EMPLOYEE'])], StockController.stockEntry);
 
-// Sortie de stock - ADMIN/MANAGER/EMPLOYEE (pour les ventes, consommations, etc.)
+/**
+ * @swagger
+ * /stock/exit:
+ *   post:
+ *     summary: Enregistrer une sortie de stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - quantity
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *               quantity:
+ *                 type: number
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Sortie de stock enregistrée
+ */
 router.post('/exit', [checkJwt, checkRole(['ADMIN', 'MANAGER', 'EMPLOYEE'])], StockController.stockExit);
 
-// Ajustement de stock - ADMIN/MANAGER uniquement (corrections d'inventaire)
+/**
+ * @swagger
+ * /stock/adjustment:
+ *   post:
+ *     summary: Ajustement manuel du stock
+ *     tags: [Stock]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - quantity
+ *               - reason
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *               quantity:
+ *                 type: number
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Ajustement effectué
+ *       403:
+ *         description: Accès interdit
+ */
 router.post('/adjustment', [checkJwt, checkRole(['ADMIN', 'MANAGER'])], StockController.stockAdjustment);
 
 export default router;

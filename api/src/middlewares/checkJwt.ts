@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import basicAuth from 'basic-auth';
 import * as jwt from 'jsonwebtoken';
 import config from '../config/config';
 
@@ -31,4 +32,17 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
   res.setHeader('token', newToken);
   // Call the next middleware or controller
   next();
+};
+
+export const swaggerAuth = (req, res, next) => {
+  const user = basicAuth(req);
+  const isAuthorized =
+    user && user.name === process.env.SWAGGER_USER && user.pass === process.env.SWAGGER_PASSWORD;
+
+  if (isAuthorized) {
+    return next();
+  }
+
+  res.set('WWW-Authenticate', 'Basic realm="Swagger Docs"');
+  return res.status(401).send('Authentication required.');
 };

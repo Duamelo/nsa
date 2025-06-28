@@ -8,18 +8,31 @@ import routes from './routes';
 
 import * as dotenv from 'dotenv';
 import { logRequest } from './middlewares/logRequest';
-import '../src/logger/otel';
+
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerOptions from '../docs/swaggerConfig';
+import { swaggerAuth } from './middlewares/checkJwt';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const app = express();
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Middlewares
 app.use(cors());
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(
+  '/api-docs',
+  swaggerAuth,
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: { persistAuthorization: true },
+  })
+);
 
 const connectDatabase = async () => {
   try {
