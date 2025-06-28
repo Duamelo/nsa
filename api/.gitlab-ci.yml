@@ -1,0 +1,123 @@
+stages:
+  - setup
+  - lint
+  - audit
+  - test
+  - build
+  - deploy
+  - cleanup
+
+default:
+  image: node:20-alpine
+  tags:
+    - shell-executor
+
+install-dependencies:
+  stage: setup
+  script:
+    - echo "Installation des dépendances"
+    - npm ci || install
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1h
+
+lint:
+  stage: lint
+  dependencies:
+    - install-dependencies
+  script:
+    - echo "Analyse du code source"
+    - npm run lint
+
+scan-sensitive-informations:
+  stage: audit
+  script:
+    - echo "Clonage de git-secrets..."
+    - git clone https://github.com/awslabs/git-secrets.git
+    - cd git-secrets
+    - make
+    - echo "Vérification des infos sensibles..."
+    - ./git-secrets --scan
+
+scan-dependencies:
+  stage: audit
+  dependencies:
+    - install-dependencies
+  script:
+    - npm audit --audit-level=moderate
+
+test:
+  stage: test
+  dependencies:
+    - install-dependencies
+  script:
+    - echo "Exécution des tests unitaires"
+    - npm run test
+  artifacts:
+    when: always
+    paths:
+      - test-results/junit.xml
+    reports:
+      junit: test-results/junit.xml
+    expire_in: 1 week
+
+test-coverage:
+  stage: test
+  dependencies:
+    - install-dependencies
+  script:
+    - echo "Analyse de la couverture de code"
+    - npm run test:coverage
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.info
+    paths:
+      - coverage/
+    expire_in: 1 week
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)%/'
+
+build:
+  stage: build
+  dependencies:
+    - install-dependencies
+  script:
+    - echo "Build du projet"
+    - npm run build
+  only:
+    - /^feature\/.*/
+    - /^bugfix\/.*/
+    - /^hotfix\/.*/
+
+build-prod:
+  stage: build
+  before_script:
+    - echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USER" --password-stdin $REGISTRY
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker tag $IMAGE_NAME $REGISTRY/$IMAGE_NAME
+    - docker push $REGISTRY/$IMAGE_NAME
+  only:
+    - master
+
+deploy-prod:
+  stage: deploy
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$API_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $API_HOST >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes $API_USER@$API_HOST << 'EOF'
+        set -e
+        echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USER" --password-stdin $REGISTRY
+        echo "Connexion SSH réussie !"
+        docker-compose down
+        docker-compose up -d
+      EOF
+  only:
+    - master
+  when: manual
