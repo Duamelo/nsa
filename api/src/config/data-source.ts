@@ -4,6 +4,8 @@ import path from 'path';
 
 config();
 
+const rootDir = process.env.NODE_ENV === 'production' ? 'build' : '..'
+
 export const AppDataSource = new DataSource({
   type: 'mysql',
   host: process.env.DB_HOST,
@@ -13,7 +15,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: process.env.NODE_ENV === 'development',
   logging: process.env.NODE_ENV === 'development',
-  entities: [path.join('..', 'entity', '**', '*.{ts,js}')],
-  migrations: [path.join('..', 'migration', '**', '*.{ts,js}')],
+  entities: [path.join(rootDir, 'entity', '**', '*.{ts,js}')],
+  migrations: [path.join(rootDir, 'migration', '**', '*.{ts,js}')],
   charset: 'utf8mb4',
 });
