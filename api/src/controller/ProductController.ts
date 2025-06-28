@@ -160,12 +160,12 @@ export class ProductController {
             });
 
             // Validation du stock
-            const stockErrors = await validate(newStock);
-            if (stockErrors.length > 0) {
-                await queryRunner.rollbackTransaction();
-                res.status(400).json({ message: 'Erreurs de validation du stock', errors: stockErrors });
-                return;
-            }
+            // const stockErrors = await validate(newStock);
+            // if (stockErrors.length > 0) {
+            //     await queryRunner.rollbackTransaction();
+            //     res.status(400).json({ message: 'Erreurs de validation du stock', errors: stockErrors });
+            //     return;
+            // }
 
             // Sauvegarder le stock
             const savedStock = await stockRepository.save(newStock);
