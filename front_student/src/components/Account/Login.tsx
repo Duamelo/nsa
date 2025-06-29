@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../store/actions/account.actions";
 import TextInput from "../../common/components/TextInput";
 import Notifications from "../../common/components/Notification";
-import { Link, useNavigate } from "react-router-dom"; // <-- useNavigate ici
+import { Link, useNavigate } from "react-router-dom"; 
 import useSession from "react-session-hook";
 import Cookies from "js-cookie";
 
 const Login: React.FC = () => {
   const dispatch: Dispatch<any> = useDispatch();
-  const navigate = useNavigate(); // <-- remplacer useHistory par useNavigate
+  const navigate = useNavigate(); 
 
   const [formState, setFormState] = useState({
     email: { error: "", value: "" },
