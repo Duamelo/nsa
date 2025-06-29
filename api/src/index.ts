@@ -16,7 +16,7 @@ import { swaggerAuth } from './middlewares/checkJwt';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 7000;
 const app = express();
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
@@ -67,7 +67,6 @@ app.use('/api', routes);
 app.get('/', (req, res) => {
   res.json({
     message: 'API de gestion de stock',
-    database: 'dev_db',
     status: 'running'
   });
 });
@@ -79,7 +78,6 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`🚀 Server started on port ${PORT}!`);
-      console.log(`📊 Database: dev_db`);
       console.log(`🌐 API disponible sur: http://localhost:${PORT}/api`);
     });
   } catch (error) {

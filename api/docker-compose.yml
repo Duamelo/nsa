@@ -1,39 +1,54 @@
 services:
-  db:
-    # the service hosting your MySQL instance
-    image: mysql:5.7 # the image and tag docker will pull from docker hub
-    container_name: dev_db
-    volumes:
-      # this section allows you to configure persistence within multiple restarts
-      - db_data:/var/lib/mysql
-    restart: always # if the db crash somehow, restart it
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
     environment:
-      # env variables, you usually set this to override existing ones
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: dev_db
-    # MYSQL_USER: root
-    # MYSQL_PASSWORD: root
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ports:
-      - "3307:3306"
+      - "9200:9200"
     networks:
-      - backend
+      - elk
 
-  api:
-    container_name: dev_api
-    image: NSA_API
-    build: .
-    restart: always
-    environment:
-      DB_HOST: db
+  logstash:
+    image: logstash:8.12.0
+    container_name: logstash
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
     ports:
-      - "5000:4000"
-    networks:
-      - backend
+      - "5000:5000"
+      - "5001:5001"
     depends_on:
-      - db
+      - elasticsearch
+    networks:
+      - elk
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - elk
+
+  filebeat:
+    build:
+      context: filebeat/
+    environment:
+      - strict.perms=false
+    container_name: filebeat
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./build/logs:/var/log/microservice:ro
+    depends_on:
+      - logstash
+    networks:
+      - elk
 
 networks:
-  backend:
+  elk:
     driver: bridge
-volumes:
-  db_data: 
