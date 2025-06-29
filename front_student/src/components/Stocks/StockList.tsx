@@ -85,10 +85,10 @@ const StockList: React.FC = () => {
     ));
 
     return (
-        <div className="portlet">
+        <div className="portlet overflow-auto">
             <div className="mb-3" style={{ display: "flex", gap: "1rem", justifyContent: "end" }}>
                 <label>
-                    Produit :
+                    Product:
                     <select className="form-control" value={selectedProductId} onChange={handleProductChange}>
                         {products.map((product) => (
                             <option key={product.id} value={product.id}>
@@ -99,7 +99,7 @@ const StockList: React.FC = () => {
                 </label>
 
                 <label>
-                    Date début :
+                    Start date:
                     <input
                         type="date"
                         className="form-control"
@@ -109,7 +109,7 @@ const StockList: React.FC = () => {
                 </label>
 
                 <label>
-                    Date fin :
+                    End date:
                     <input
                         type="date"
                         className="form-control"
@@ -124,12 +124,12 @@ const StockList: React.FC = () => {
                     <thead className="thead-light">
                         <tr>
                             <th>#</th>
-                            <th>Produit</th>
-                            <th>Ancienne Qté</th>
-                            <th>Nouvelle Qté</th>
-                            <th>Quantité</th>
-                            <th>Raison</th>
-                            <th>Référence</th>
+                            <th>Product</th>
+                            <th>Old Qty</th>
+                            <th>New Qty</th>
+                            <th>Quantity</th>
+                            <th>Reason</th>
+                            <th>Reference</th>
                             <th>Type</th>
                         </tr>
                     </thead>

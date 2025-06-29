@@ -31,7 +31,7 @@ export function entryStock(stock: IStock) {
       );
 
       dispatch({ type: ADD_STOCK, stock: response.data });
-      dispatch(addNotification("Success", "Stock ajouté avec succès"));
+      dispatch(addNotification("Success", "Stock ajouté avec succès", "success"));
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -85,7 +85,7 @@ export function exitStock(stock: IStock) {
       );
 
       dispatch({ type: ADD_STOCK, stock: response.data });
-      dispatch(addNotification("Success", "Stock sorti avec succès"));
+      dispatch(addNotification("Success", "Stock sorti avec succès", "success"));
       setTimeout(() => {
         window.location.reload();
       }, 1000);

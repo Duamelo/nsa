@@ -29,13 +29,13 @@ export function me(): any {
         } catch (e: unknown) {
             if (isAxiosError(e)) {
                 if (e.response === undefined) {
-                    return dispatch(addNotification("Error", e.message ?? "Unknown error"));
+                    return dispatch(addNotification("Error", e.message ?? "Unknown error", "error"));
                 }
-                return dispatch(addNotification("Error", "Session expired"));
+                return dispatch(addNotification("Error", "Session expired", "error"));
             } else if (e instanceof Error) {
-                return dispatch(addNotification("Error", e.message));
+                return dispatch(addNotification("Error", e.message, "error"));
             } else {
-                return dispatch(addNotification("Error", "Unknown error"));
+                return dispatch(addNotification("Error", "Unknown error", "error"));
             }
         }
     };
@@ -53,13 +53,13 @@ export function login(email: string, password: string): any {
         } catch (e: unknown) {
             if (isAxiosError(e)) {
                 if (e.response === undefined) {
-                    return dispatch(addNotification("Error", e.message ?? "Unknown error"));
+                    return dispatch(addNotification("Error", e.message ?? "Unknown error", "error"));
                 }
-                return dispatch(addNotification("Error", e.response.data));
+                return dispatch(addNotification("Error", e.response.data, "error"));
             } else if (e instanceof Error) {
-                return dispatch(addNotification("Error", e.message));
+                return dispatch(addNotification("Error", e.message, "error"));
             } else {
-                return dispatch(addNotification("Error", "Unknown error"));
+                return dispatch(addNotification("Error", "Unknown error", "error"));
             }
         }
     };
@@ -74,7 +74,7 @@ export function register(email: string, password: string): any {
                 role: "NORMAL"
             });
 
-            dispatch(addNotification("Success", response.data));
+            dispatch(addNotification("Success", response.data, "success"));
             dispatch({ type: REGISTER });
             setTimeout(() => {
                 window.location.href = "/login";
@@ -84,16 +84,16 @@ export function register(email: string, password: string): any {
         } catch (e: unknown) {
             if (isAxiosError(e)) {
                 if (e.response === undefined) {
-                    return dispatch(addNotification("Error", e.message ?? "Unknown error"));
+                    return dispatch(addNotification("Error", e.message ?? "Unknown error", "error"));
                 }
                 if (Array.isArray(e.response.data) && e.response.data.length > 0 && e.response.data[0].constraints?.length) {
-                    return dispatch(addNotification("Error", e.response.data[0].constraints.length));
+                    return dispatch(addNotification("Error", e.response.data[0].constraints.length, "error"));
                 }
-                return dispatch(addNotification("Error", e.response.data));
+                return dispatch(addNotification("Error", e.response.data, "error"));
             } else if (e instanceof Error) {
-                return dispatch(addNotification("Error", e.message));
+                return dispatch(addNotification("Error", e.message, "error"));
             } else {
-                return dispatch(addNotification("Error", "Unknown error"));
+                return dispatch(addNotification("Error", "Unknown error", "error"));
             }
         }
     };

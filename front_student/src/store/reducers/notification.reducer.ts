@@ -14,7 +14,8 @@ function notificationReducer(state: INotificationState = initialState, action: I
                 id: maxId + 1,
                 date: new Date(),
                 title: action.title,
-                text: action.text
+                text: action.text,
+                status: action.status
             };
             return {...state, notifications: [...state.notifications, newItem]};
         }

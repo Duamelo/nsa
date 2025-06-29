@@ -15,3 +15,29 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.toast-success {
+  border-left: 5px solid #28a745;
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.toast-error {
+  border-left: 5px solid #dc3545;
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.toast-warning {
+  border-left: 5px solid #ffc107;
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.toast-info {
+  border-left: 5px solid #17a2b8;
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+

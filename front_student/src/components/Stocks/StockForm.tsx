@@ -86,7 +86,7 @@ const StockForm: React.FC = () => {
         <Fragment>
             <div className="card shadow mb-4">
                 <div className="card-header py-3">
-                    <h6 className="m-0 font-weight-bold text-green">Ajouter au stock</h6>
+                    <h6 className="m-0 font-weight-bold text-green">Add stock</h6>
                 </div>
                 <div className="card-body">
                     <form onSubmit={(e) => e.preventDefault()} className="form-horizontal">
@@ -99,7 +99,7 @@ const StockForm: React.FC = () => {
                                     onChange={handleChange}
                                     min={1}
                                     max={1000}
-                                    label="Quantité"
+                                    label="Quantity"
                                 />
                             </div>
                             <div className="form-group col-md-4">
@@ -108,9 +108,9 @@ const StockForm: React.FC = () => {
                                     value={formState.reason.value}
                                     field="reason"
                                     onChange={handleChange}
-                                    label="Raison"
+                                    label="Reason"
                                     required={true}
-                                    placeholder="Ex : Réassort"
+                                    placeholder="e.g. Restocking"
                                     maxLength={50}
                                 />
                             </div>
@@ -120,9 +120,9 @@ const StockForm: React.FC = () => {
                                     value={formState.reference.value}
                                     field="reference"
                                     onChange={handleChange}
-                                    label="Référence"
+                                    label="Reference"
                                     required={true}
-                                    placeholder="Réf. commande ou facture"
+                                    placeholder="Order or invoice ref."
                                     maxLength={50}
                                 />
                             </div>

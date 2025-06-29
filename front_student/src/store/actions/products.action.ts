@@ -40,12 +40,12 @@ export function addProduct(product: IProduct): any {
       });
 
       dispatch({ type: ADD_PRODUCT, product: response.data });
-      dispatch(addNotification("Success", "Produit ajouté avec succès"));
+      dispatch(addNotification("Success", "Produit ajouté avec succès", "success"));
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (error: any) {
-      dispatch(addNotification("Error", error.response.data.message || "Erreur lors de l'ajout du produit"));
+      dispatch(addNotification("Error", error.response.data.message || "Erreur lors de l'ajout du produit", "error"));
     }
   };
 }
@@ -62,7 +62,7 @@ export function fetchProducts(): any {
       return dispatch({ type: GET_PRODUCTS, products: response.data.products });
     } catch (error: any) {
       console.error(error);
-      dispatch(addNotification("Error", "Erreur lors de la récupération des produits"));
+      dispatch(addNotification("Error", "Erreur lors de la récupération des produits", "error"));
     }
   };
 }
@@ -84,13 +84,13 @@ export function editProduct(product: IProduct): any {
         },
       });
       dispatch({ type: EDIT_PRODUCT, product: response.data });
-      dispatch(addNotification("Success", "Produit modifié avec succès"));
+      dispatch(addNotification("Success", "Produit modifié avec succès", "success"));
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (error: any) {
       console.error(error);
-      dispatch(addNotification("Error", "Erreur lors de la modification du produit"));
+      dispatch(addNotification("Error", "Erreur lors de la modification du produit", "error"));
     }
   };
 }
@@ -104,10 +104,10 @@ export function removeProduct(id: number): any {
         },
       });
       dispatch({ type: REMOVE_PRODUCT, id: id });
-      dispatch(addNotification("Success", "Produit supprimé avec succès"));
+      dispatch(addNotification("Success", "Produit supprimé avec succès", "success"));
     } catch (error: any) {
       console.error(error);
-      dispatch(addNotification("Error", "Erreur lors de la suppression du produit"));
+      dispatch(addNotification("Error", "Erreur lors de la suppression du produit", "error"));
     }
   };
   

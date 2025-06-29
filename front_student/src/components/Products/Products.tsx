@@ -100,7 +100,7 @@ const Products: React.FC = () => {
                 if (!products.selectedProduct) {
                   return;
                 }
-                dispatch(addNotification("Product removed", `Product ${products.selectedProduct.name} was removed`));
+                dispatch(addNotification("Product removed", `Product ${products.selectedProduct.name} was removed`, "error"));
                 dispatch(removeProduct(products.selectedProduct.id));
                 dispatch(clearSelectedProduct());
                 setPopup(false);

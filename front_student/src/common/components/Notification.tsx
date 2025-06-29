@@ -6,8 +6,9 @@ import { removeNotification } from "../../store/actions/notifications.action";
 
 const Notifications: React.FC = () => {
   const dispatch: Dispatch<any> = useDispatch();
-  const notifications: INotification[] = useSelector((state: IStateType) =>
-    state.notifications.notifications);
+  const notifications: INotification[] = useSelector(
+    (state: IStateType) => state.notifications.notifications
+  );
 
   useEffect(() => {
     const timeouts: NodeJS.Timeout[] = [];
@@ -29,33 +30,58 @@ const Notifications: React.FC = () => {
     dispatch(removeNotification(id));
   };
 
-  const notificationList = notifications.map(notification => {
+  // Icônes par status
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "success":
+        return <i className="fas fa-check-circle text-success mr-2"></i>;
+      case "error":
+        return <i className="fas fa-times-circle text-error mr-2"></i>;
+      case "warning":
+        return <i className="fas fa-exclamation-triangle text-warning mr-2"></i>;
+      case "info":
+      default:
+        return <i className="fas fa-info-circle text-info mr-2"></i>;
+    }
+  };
+
+  const notificationList = notifications.map((notification) => {
     return (
-      <div className="toast" key={`notification_${notification.id}`}>
+      <div
+        className={`toast toast-${notification.status}`}
+        key={`notification_${notification.id}`}
+      >
         <div className="toast-header">
-          <i className="fas fa-fw fa-bell"></i>
-          <strong className="mr-auto">{notification.title}</strong>
-          <small>{notification.date.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' })}</small>
-          <button type="button"
+          {/* Icône cloche à gauche du titre */}
+          <i className={`fas fa-fw fa-bell text-${notification.status} mr-2`}></i>
+          <strong className={`mr-auto text-${notification.status}`}>
+            {notification.title}
+          </strong>
+          <small>
+            {notification.date.toLocaleTimeString(navigator.language, {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </small>
+          <button
+            type="button"
             className="ml-2 mb-1 close"
             data-dismiss="toast"
             aria-label="Close"
-            onClick={() => closeNotification(notification.id)}>
+            onClick={() => closeNotification(notification.id)}
+          >
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div className="toast-body">
-          {notification.text}
+        <div className="toast-body text-dark d-flex align-items-start">
+          {getStatusIcon(notification.status)}
+          <span>{notification.text}</span>
         </div>
       </div>
-    )
+    );
   });
 
-  return (
-    <div className="toast-wrapper">
-      {notificationList}
-    </div>
-  );
+  return <div className="toast-wrapper">{notificationList}</div>;
 };
 
 export default Notifications;
